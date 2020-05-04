@@ -1,59 +1,40 @@
-int[][] grid;
+//client
+import processing.net.*;
 
+Client myClient;
+String outgoing;
+String incoming;
+String valid = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()-=+_;:?.,";
 
-void setup() {
-  size(300, 400);
-  grid = new int[3][3];
-  strokeWeight(3);
-  textAlign(CENTER, CENTER);
-  textSize(50);
+void setup(){
+  size(300,300);
+  textAlign(CENTER,CENTER);
+  textSize(20);
+  
+  incoming = "";
+   outgoing = "";
+                      //this=sketch          //port#
+  myClient = new Client(this, "127.0.0.1", 12345);
+                              //ip address
 }
 
-void draw() {
+void draw(){
   background(255);
-
-  //draw dividing lines
-  stroke(0);
-  line(0, 100, 300, 100);
-  line(0, 200, 300, 200);
-  line(100, 0, 100, 300);
-  line(200, 0, 200, 300);
-
-  //draw the x's and o's
-  int row = 0;
-  int col = 0;
-  while (row < 3) {
-    drawXO(row, col);
-    col++;
-    if (col == 3) {
-      col = 0;
-      row++;
-    }
-  }
-
-  //draw mouse coords
   fill(0);
-  text(mouseX + "," + mouseY, 150, 350);
-}
-
-
-void drawXO(int row, int col) {
-  pushMatrix();
-  translate(row*100, col*100);
-  if (grid[row][col] == 1) {
-    ellipse(50, 50, 90, 90);
-  } else if (grid[row][col] == 2) {
-    line (10, 10, 90, 90);
-    line (90, 10, 10, 90);
+  text(incoming,width/2,height/2-100);
+  
+  if (myClient.available()>0){//how we get/read messages
+    incoming = myClient.readString();
   }
-  popMatrix();
 }
 
-
-void mouseReleased() {
-  //assign the clicked-on box with the current player's mark
-  int row = (int)mouseX/100;
-  int col = (int)mouseY/100;
-  if (grid[row][col] == 0)
-    grid[row][col] = 2;
+void keyPressed(){
+  if (key == ENTER){
+    myClient.write(outgoing);
+    outgoing = "";
+  } else if (key== BACKSPACE && outgoing.length()>0){
+    outgoing.substring(0,outgoing.length()-1);
+  } else if (valid.contains(""+key)){
+    outgoing = outgoing+key;
+  }
 }
